@@ -47,8 +47,7 @@ import           GHC.Tc.Errors.Ppr                 (pprErrCtxtMsg)
 import           GHC.Utils.Outputable              (vcat)
 #endif
 import qualified Ide.Logger                        as Logger
-import           Ide.Plugin.Error                  (PluginError,
-                                                    getNormalizedFilePathE)
+import           Ide.Plugin.Error                  (PluginError)
 import           Ide.Types                         (Config, HandlerM,
                                                     PluginDescriptor (..),
                                                     PluginId (PluginId),
@@ -89,16 +88,16 @@ codeActionHandler
     -> PluginMethodHandler IdeState 'Method_TextDocumentCodeAction
 codeActionHandler recorder plId ideState _ CodeActionParams{_textDocument, _range} = do
     let TextDocumentIdentifier uri = _textDocument
-    nfp <- getNormalizedFilePathE uri
-    decls <- getDecls plId ideState nfp
+    let nuri = toNormalizedUri uri
+    decls <- getDecls plId ideState nuri
 
-    activeDiagnosticsInRange (shakeExtras ideState) nfp _range >>= \case
+    activeDiagnosticsInRange (shakeExtras ideState) nuri _range >>= \case
         Nothing -> pure (InL [])
         Just fileDiags -> do
             actions <- lift $ mapM (generateAction recorder plId uri decls) fileDiags
             pure (InL (catMaybes actions))
 
-getDecls :: MonadIO m => PluginId -> IdeState -> NormalizedFilePath -> ExceptT PluginError m [LHsDecl GhcPs]
+getDecls :: MonadIO m => PluginId -> IdeState -> NormalizedUri -> ExceptT PluginError m [LHsDecl GhcPs]
 getDecls (PluginId changeTypeSignatureId) state =
     runActionE (T.unpack changeTypeSignatureId <> ".GetParsedModule") state
     . fmap (hsmodDecls . unLoc . pm_parsed_source)
