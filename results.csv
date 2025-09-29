@@ -1,0 +1,2 @@
+name, success, samples, startup, setup, userT, delayedT, 1stBuildT, avgPerRespT, totalT, rulesBuilt, rulesChanged, rulesVisited, rulesTotal, ruleEdges, ghcRebuilds
+hover, False, 1, 0.00, 0.00, 0.00, 0.00, 0.00, NaN, 0.00, 0, 0, 0, 0, 0, 0

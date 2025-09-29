@@ -1263,7 +1263,7 @@ defineEarlyCutoff' doDiagnostics cmp key file mbOld mode action = do
                     Just (Stale d ver v, _)   -> Stale d ver v
                     Just (Failed b, _)        -> Failed b
                 (mbBs, (diags, mbRes)) <- actionCatch
-                    (do v <- action staleV; liftIO $ evaluate $ force v) $
+                    (do v <- action staleV; liftIO $ evaluate v) $
                     \(e :: SomeException) -> do
                         pure (Nothing, ([ideErrorText file (T.pack $ show (key, file) ++ show e) | not $ isBadDependency e],Nothing))
 
