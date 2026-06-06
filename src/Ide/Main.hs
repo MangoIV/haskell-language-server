@@ -114,7 +114,11 @@ defaultMain recorder args idePlugins = do
           let initialFp = d </> "a"
           hieYaml <- Session.findCradle def initialFp
           cradle <- Session.loadCradle def (cmapWithPrio LogSession recorder) hieYaml d
-          (CradleSuccess libdir) <- HieBios.getRuntimeGhcLibDir cradle
+#if defined(wasm32_HOST_ARCH)
+          let libdir = "/lib"
+#else
+          CradleSuccess libdir <- HieBios.getRuntimeGhcLibDir cradle
+#endif
           putStr libdir
   where
     encodePrettySorted = A.encodePretty' A.defConfig

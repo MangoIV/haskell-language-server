@@ -1264,7 +1264,11 @@ getPid = T.pack . show <$> getProcessID
 getProcessID :: IO Int
 installSigUsr1Handler :: IO () -> IO ()
 
-#ifdef mingw32_HOST_OS
+#if defined(wasm32_HOST_ARCH)
+getProcessID = pure 69420
+installSigUsr1Handler _ = pure ()
+
+#elif defined(mingw32_HOST_OS)
 getProcessID = fromIntegral <$> P.getCurrentProcessId
 installSigUsr1Handler _ = return ()
 

@@ -1751,7 +1751,7 @@ library hls-refactor-plugin
 
 test-suite hls-refactor-plugin-tests
   import:           defaults, pedantic, test-defaults, warnings
-  if !flag(refactor)
+  if !flag(refactor) || arch(wasm32)
     buildable: False
   type:             exitcode-stdio-1.0
   hs-source-dirs:   plugins/hls-refactor-plugin/test
@@ -1979,12 +1979,56 @@ library
 
   default-extensions: DataKinds
 
+executable haskell-language-server-wasm
+  import:           defaults
+                  , warnings
+                  , pedantic
+  main-is:          Main.hs
+  hs-source-dirs:   exe-wasm
+
+  if !arch(wasm32)
+    buildable: False
+
+  ghc-options:
+    -shared
+    -dynamic
+    -O2
+    -no-keep-o-files
+    -no-keep-hi-files
+    -v0
+
+  ghc-options:
+    -- allow user RTS overrides
+    -rtsopts
+    -- disable idle GC
+    -- increase nursery size
+    -- Enable collection of heap statistics
+    "-with-rtsopts=-I0 -A128M -T"
+    -debug
+
+  if flag(pedantic)
+    ghc-options: -Werror
+
+  build-depends:
+    , haskell-language-server
+    , hls-plugin-api
+    , lsp
+    , prettyprinter           >= 1.7
+    , text
+    , ghc
+    , ghc-experimental
+
+  default-extensions: DataKinds
+
 executable haskell-language-server
   import:           defaults
                   , warnings
                   , pedantic
   main-is:          Main.hs
   hs-source-dirs:   exe
+
+  if arch(wasm32)
+    buildable: False
 
   ghc-options:
     -threaded
@@ -2023,6 +2067,8 @@ executable haskell-language-server-wrapper
   hs-source-dirs:   exe
   other-modules:    Paths_haskell_language_server
   autogen-modules:  Paths_haskell_language_server
+  if arch(wasm32)
+    buildable: False
   ghc-options:
     -threaded
     -- allow user RTS overrides
@@ -2126,6 +2172,8 @@ test-suite wrapper-test
 benchmark benchmark
     import:           defaults, warnings
     -- Depends on shake-bench which is unbuildable after this point
+    if arch(wasm32)
+      buildable: False
     type: exitcode-stdio-1.0
     ghc-options: -threaded
     main-is: Main.hs
@@ -2166,13 +2214,15 @@ executable ghcide-test-preprocessor
   main-is:          Main.hs
   build-depends:    base >=4 && <5
 
-  if !flag(test-exe)
+  if !flag(test-exe) || arch(wasm32)
     buildable: False
 
 test-suite ghcide-tests
   import: warnings, defaults
   type:               exitcode-stdio-1.0
   default-language:   GHC2021
+  if arch(wasm32)
+    buildable: False
   build-tool-depends:
     , ghcide:ghcide
     , haskell-language-server:ghcide-test-preprocessor
@@ -2270,7 +2320,7 @@ flag ghcide-bench
 
 executable ghcide-bench
     import: defaults
-    if !flag(ghcide-bench)
+    if !flag(ghcide-bench) || arch(wasm32)
       buildable: False
     build-depends:
         aeson,
@@ -2305,6 +2355,8 @@ library ghcide-bench-lib
     import: defaults
     hs-source-dirs: ghcide-bench/src
     ghc-options: -Wall -Wno-name-shadowing
+    if arch(wasm32)
+      buildable: False
     exposed-modules:
         Experiments.Types
         Experiments

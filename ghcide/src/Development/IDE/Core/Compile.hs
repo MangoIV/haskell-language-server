@@ -1182,12 +1182,15 @@ getModSummaryFromImports
 -- modTime is only used in GHC < 9.4
 getModSummaryFromImports env uri _modTime mContents = do
 -- src_hash is only used in GHC >= 9.4
+    traceM "=== before preprocessor"
     (contents, opts, ppEnv, _src_hash) <- preprocessor env uri mContents
+    traceM "=== after preprocessor"
 
     let dflags = hsc_dflags ppEnv
 
     -- The warns will hopefully be reported when we actually parse the module
     (_warns, L main_loc hsmod) <- parseHeader dflags uri contents
+    traceM "=== after parse header"
 
     -- Copied from `HeaderInfo.getImports`, but we also need to keep the parsed imports
     let mb_mod = hsmodName hsmod
@@ -1209,8 +1212,7 @@ getModSummaryFromImports env uri _modTime mContents = do
                                          implicit_prelude imps
 
 
-        convImport (L _ i) = (
-                               (ideclPkgQual i)
+        convImport (L _ i) = ( ideclPkgQual i
                              , reLoc $ ideclName i)
 
         msrImports = implicit_imports ++ imps
@@ -1229,8 +1231,11 @@ getModSummaryFromImports env uri _modTime mContents = do
 
 
     -- Force bits that might keep the string buffer and DynFlags alive unnecessarily
+    traceM "==== before evaluating source imports"
     liftIO $ evaluate $ rnf srcImports
+    traceM "==== evaluated source imports"
     liftIO $ evaluate $ rnf textualImports
+    traceM "==== evaluated textual imports"
 
 
     -- NOTE: thisis pretty bad as it relies on the prepropcessors not actually reading from a file when it's not needed
@@ -1239,6 +1244,7 @@ getModSummaryFromImports env uri _modTime mContents = do
 
     let file = T.unpack $ getUri uri
 
+    traceM "===== before making home mod location"
     modLoc <- liftIO $ if mod == mAIN_NAME
         -- specially in tests it's common to have lots of nameless modules
         -- mkHomeModLocation will map them to the same hi/hie locations
@@ -1270,8 +1276,10 @@ getModSummaryFromImports env uri _modTime mContents = do
                 , ms_textual_imps = textualImports
                 }
 
+    traceM "===== before computing fingerprint"
     msrFingerprint <- liftIO $ computeFingerprint file opts msrModSummary
     msrHscEnv <- liftIO $ Loader.initializePlugins (hscSetFlags (ms_hspp_opts msrModSummary) ppEnv)
+    traceM "===== returning mod summary result"
     return ModSummaryResult{..}
     where
         -- Compute a fingerprint from the contents of `ModSummary`,

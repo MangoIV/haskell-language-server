@@ -36,17 +36,23 @@ import           GHC.Utils.Logger                  (LogFlags (..))
 #if MIN_VERSION_ghc(9,13,0)
 import           GHC.Driver.Config.Parser          (supportedLanguagePragmas)
 #endif
+import           Debug.Trace
+import           GHC                               (DynFlags (..))
+import           GHC.Driver.Env                    (hscUpdateLoggerFlags)
 import           System.FilePath
 import           System.IO.Extra
 
 -- | Given a file and some contents, apply any necessary preprocessors,
 --   e.g. unlit/cpp. Return the resulting buffer and the DynFlags it implies.
 preprocessor :: HscEnv -> Uri -> Maybe Util.StringBuffer -> ExceptT [FileDiagnostic] IO (Util.StringBuffer, [String], HscEnv, Util.Fingerprint)
-preprocessor env uri mbContents = do
+preprocessor env0 uri mbContents = do
     -- NOTE: thisis pretty bad as it relies on the prepropcessors not actually reading from a file when it's not needed
     when (isNothing (uriToFilePath uri) && isNothing mbContents) $ do
         throwError [ideErrorText (toNormalizedUri uri) $ "Uri is not a file uri and contents are not available: " <> getUri uri]
-    let filename = T.unpack $ getUri uri
+    let filename = fromJust $ uriToFilePath uri
+    let dflags = (hsc_dflags env0) { verbosity = 6, debugLevel = 10 }
+        env = hscSetActiveUnitId (homeUnitId_ dflags) $ hscUpdateLoggerFlags $ hscSetFlags dflags env0
+    traceM $ "=== file name " <> show filename
     -- Perform unlit
     (isOnDisk, contents) <-
         if isLiterate uri then do
@@ -62,9 +68,11 @@ preprocessor env uri mbContents = do
     !src_hash <- liftIO $ Util.fingerprintFromStringBuffer contents
 
     -- Perform cpp
+    traceM "even beforer before parsePragmas"
     (opts, pEnv) <- ExceptT $ parsePragmasIntoHscEnv env uri contents
     let dflags = hsc_dflags pEnv
     let logger = hsc_logger pEnv
+    traceM "before parsePragmas"
     (newIsOnDisk, newContents, newOpts, newEnv) <-
         if not $ xopt LangExt.Cpp dflags then
             return (isOnDisk, contents, opts, pEnv)
@@ -85,6 +93,7 @@ preprocessor env uri mbContents = do
             return (False, con, options, hscEnv)
 
     -- Perform preprocessor
+    traceM "before perform preprocessor"
     if not $ gopt Opt_Pp dflags then
         return (newContents, newOpts, newEnv, src_hash)
     else do
@@ -155,23 +164,31 @@ parsePragmasIntoHscEnv
     -> Util.StringBuffer
     -> IO (Either [FileDiagnostic] ([String], HscEnv))
 parsePragmasIntoHscEnv env uri contents = catchSrcErrors dflags0 "pragmas" $ do
+    let fp = fromMaybe (show uri) $ uriToFilePath uri
 #if MIN_VERSION_ghc(9,13,0)
     let supportedExts = supportedLanguagePragmas dflags0
     let (_warns,opts) = getOptions (initParserOpts dflags0) supportedExts contents fp
 #else
-    let (_warns,opts) = getOptions (initParserOpts dflags0) contents (fromMaybe (show uri) $ uriToFilePath uri)
+    let (_warns,opts) = getOptions (initParserOpts dflags0) contents fp
 #endif
 
     -- Force bits that might keep the dflags and stringBuffer alive unnecessarily
     evaluate $ rnf opts
+    traceM "==== evaluated opts"
 
 #if MIN_VERSION_ghc(9,13,0)
-    (dflags, _, _) <- parseDynamicFilePragma (hsc_logger env) dflags0 opts
+    -- (dflags, _, _) <- parseDynamicFilePragma (hsc_logger env) dflags0 opts
 #else
-    (dflags, _, _) <- parseDynamicFilePragma dflags0 opts
+    -- (dflags, _, _) <- parseDynamicFilePragma dflags0 opts
 #endif
+    -- FIXME: WE DO NOT WANT TO KEEP THE SAME DFLAGGS
+    --
+    -- but the above just hangs so we have to sadface
+    let dflags = dflags0 { verbosity = 6, debugLevel = 10 }
+    traceM "==== parsed dynamic file pragma"
     hsc_env' <- Loader.initializePlugins (hscSetFlags dflags env)
-    return (map unLoc opts, hscSetFlags (disableWarningsAsErrors $ hsc_dflags hsc_env') hsc_env')
+    traceM "==== initialize plugins"
+    return (map unLoc opts, hscSetActiveUnitId (homeUnitId_ dflags) $ hscUpdateLoggerFlags $ hscSetFlags (disableWarningsAsErrors $ hsc_dflags hsc_env') hsc_env')
   where dflags0 = hsc_dflags env
 
 -- | Run (unlit) literate haskell preprocessor on a file, or buffer if set

@@ -42,6 +42,7 @@ import           Data.Text.Utf16.Rope.Mixed                   (Rope)
 import           Data.Time
 import           Data.Time.Clock.POSIX
 import           Data.Traversable                             (for)
+import           Debug.Trace
 import           Development.IDE.Core.FileUtils
 import           Development.IDE.Core.IdeConfiguration        (isWorkspaceFile)
 import           Development.IDE.Core.RuleTypes

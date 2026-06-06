@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# LANGUAGE CPP #-}
 module Development.IDE.Main
 (Arguments(..)
 ,defaultArguments
@@ -254,7 +255,11 @@ defaultArguments recorder projectRoot plugins = Arguments
                 -- Move stdout to another file descriptor and duplicate stderr
                 -- to stdout. This guards against stray prints from corrupting the JSON-RPC
                 -- message stream.
+#if defined(wasm32_HOST_ARCH)
+                let newStdout = stdout
+#else
                 newStdout <- hDuplicate stdout
+#endif
                 stderr `hDuplicateTo'` stdout
                 hSetBuffering stdout NoBuffering
 

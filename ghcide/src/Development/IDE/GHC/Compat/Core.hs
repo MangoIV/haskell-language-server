@@ -699,7 +699,13 @@ initObjLinker env =
 
 loadDLL :: HscEnv -> String -> IO (Maybe String)
 loadDLL env str = do
+#if MIN_VERSION_ghc(9,13,0)
+    res <- GHCi.loadDLLs (GHCi.hscInterp env) [str]
+#else
+    -- FIXME: not apprprpviate
+    -- NOTE: Is it now appropriate???
     res <- GHCi.loadDLL (GHCi.hscInterp env) str
+#endif
 #if MIN_VERSION_ghc(9,11,0) || (MIN_VERSION_ghc(9, 8, 3) && !MIN_VERSION_ghc(9, 9, 0)) || (MIN_VERSION_ghc(9, 10, 2) && !MIN_VERSION_ghc(9, 11, 0))
     pure $
       case res of

@@ -189,6 +189,9 @@ fingerprintFromPut = fingerprintFromByteString . LBS.toStrict . runPut
 -- | A slightly modified version of 'hDuplicateTo' from GHC.
 --   Importantly, it avoids the bug listed in https://gitlab.haskell.org/ghc/ghc/merge_requests/2318.
 hDuplicateTo' :: Handle -> Handle -> IO ()
+#if defined(wasm32_HOST_ARCH)
+hDuplicateTo' _ _ = pure ()
+#else
 hDuplicateTo' h1@(FileHandle path m1) h2@(FileHandle _ m2)  = do
  withHandle__' "hDuplicateTo" h2 m2 $ \h2_ -> do
    -- The implementation in base has this call to hClose_help.
@@ -213,6 +216,7 @@ hDuplicateTo' h1@(DuplexHandle path r1 w1) h2@(DuplexHandle _ r2 w2)  = do
      dupHandleTo path h1 (Just w1) r2_ r1_ Nothing
 hDuplicateTo' h1 _ =
   ioe_dupHandlesNotCompatible h1
+#endif
 
 -- | This is copied unmodified from GHC since it is not exposed.
 dupHandleTo :: FilePath

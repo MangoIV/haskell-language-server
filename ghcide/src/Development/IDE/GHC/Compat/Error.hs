@@ -43,6 +43,7 @@ module Development.IDE.GHC.Compat.Error (
   ) where
 
 import           Control.Lens
+import           Control.Lens               (makePrisms)
 import           Development.IDE.GHC.Compat (Type)
 import           GHC.Driver.Errors.Types
 import           GHC.HsToCore.Errors.Types

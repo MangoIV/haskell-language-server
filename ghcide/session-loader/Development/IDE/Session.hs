@@ -397,7 +397,11 @@ getHieDbLoc :: FilePath -> IO FilePath
 getHieDbLoc dir = do
   let db = intercalate "-" [dirHash, takeBaseName dir, Compat.ghcVersionStr, hiedbDataVersion] <.> "hiedb"
       dirHash = B.unpack $ B16.encode $ H.hash $ B.pack dir
+#if defined(wasm32_HOST_ARCH)
+  cDir <- pure "/hie-cache"
+#else
   cDir <- IO.getXdgDirectory IO.XdgCache cacheDir
+#endif
   createDirectoryIfMissing True cDir
   pure (cDir </> db)
 
@@ -628,7 +632,11 @@ loadSessionWithOptions recorder SessionLoadingOptions{..} rootDir que = do
                case reverse $ readP_to_S parseVersion version of
                  [] -> error $ "GHC version could not be parsed: " <> version
                  ((runTime, _):_)
+#if defined(wasm32_HOST_ARCH)
+                   | True -> do
+#else
                    | compileTime == runTime -> do
+#endif
                      atomicModifyIORef' cradle_files (\xs -> (cfp:xs,()))
                      session (hieYaml, toNormalizedFilePath' cfp, opts, libDir)
                    | otherwise -> return (([renderPackageSetupException cfp GhcVersionMismatch{..}], Nothing),[])
@@ -729,8 +737,13 @@ cradleToOptsAndLibDir recorder loadConfig cradle file old_fps = do
     case cradleRes of
         CradleSuccess r -> do
             -- Now get the GHC lib dir
+#if defined(wasm32_HOST_ARCH)
+            let libDirRes = CradleSuccess "/lib"
+                versionRes = CradleSuccess "9.14.1"
+#else
             libDirRes <- getRuntimeGhcLibDir cradle
             versionRes <- getRuntimeGhcVersion cradle
+#endif
             case liftA2 (,) libDirRes versionRes of
                 -- This is the successful path
                 (CradleSuccess (libDir, version)) -> pure (Right (r, libDir, version))
@@ -1220,7 +1233,11 @@ setODir f d =
 
 getCacheDirsDefault :: String -> [String] -> IO CacheDirs
 getCacheDirsDefault prefix opts = do
+#if defined(wasm32_HOST_ARCH)
+    dir <- pure $ Just "/hie-cache"
+#else
     dir <- Just <$> getXdgDirectory XdgCache (cacheDir </> prefix ++ "-" ++ opts_hash)
+#endif
     return $ CacheDirs dir dir dir
     where
         -- Create a unique folder per set of different GHC options, assuming that each different set of
@@ -1241,7 +1258,7 @@ data PackageSetupException
         { compileTime :: !Version
         , runTime     :: !Version
         }
-    deriving (Eq, Show, Typeable)
+    deriving (Eq, Show)
 
 instance Exception PackageSetupException
 

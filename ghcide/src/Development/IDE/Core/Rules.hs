@@ -180,6 +180,7 @@ import           System.Info.Extra                            (isWindows)
 import qualified Data.IntMap                                  as IM
 import           GHC.Fingerprint
 import System.Process.Extra (proc, readCreateProcess)
+import Debug.Trace (traceM)
 
 data Log
   = LogShake Shake.Log
@@ -348,14 +349,14 @@ getLocatedImportsRule recorder =
                         nuri' = HM.lookupDefault nuri nuri ttmap
                     itExists <- getFileExists nuri'
                     return $ if itExists then Just nfp else Nothing
-#if MIN_VERSION_ghc(9,13,0)
-        (diags, imports') <- fmap unzip $ forM imports $ \(isSource, _lvl, mbPkgName, modName) -> do
-#else
                 | otherwise = do
                     itExists <- getFileExists nuri
                     return $ if itExists then Just nfp else Nothing
                 where
                 nuri = normalizedFilePathToUri nfp
+#if MIN_VERSION_ghc(9,13,0)
+        (diags, imports') <- fmap unzip $ forM imports $ \(isSource, _lvl, mbPkgName, modName) -> do
+#else
         (diags, imports') <- fmap unzip $ forM imports $ \(isSource, (mbPkgName, modName)) -> do
 #endif
             diagOrImp <- locateModule (hscSetFlags dflags env) import_dirs (optExtensions opt) getTargetFor modName mbPkgName isSource
@@ -942,14 +943,19 @@ getModSummaryRule displayTHWarning recorder = do
 
     defineEarlyCutoff (cmapWithPrio LogShake recorder) $ Rule $ \GetModSummary uri -> do
         session' <- hscEnv <$> use_ GhcSession uri
+        traceM "=== after ghc session"
         modify_dflags <- getModifyDynFlags dynFlagsModifyGlobal
+        traceM "=== modified dyn flags"
         let session = setNonHomeFCHook $ hscSetFlags (modify_dflags $ hsc_dflags session') session' -- TODO wz1000
         (modTime, mFileContent) <- getFileModTimeContents uri
+        traceM "=== got mode time and contents"
         let fp = fromNormalizedUri uri
         modS <- liftIO $ runExceptT $
                 getModSummaryFromImports session fp modTime (textToStringBuffer . Rope.toText <$> mFileContent)
+        traceM "=== got mod summary"
         case modS of
             Right res -> do
+                traceM "==== got result"
                 -- Check for Template Haskell
                 when (uses_th_qq $ msrModSummary res) $ do
                     DisplayTHWarning act <- getIdeGlobalAction
@@ -958,7 +964,9 @@ getModSummaryRule displayTHWarning recorder = do
                 let fingerPrint = Util.fingerprintFingerprints
                         [ msrFingerprint res, bufFingerPrint ]
                 return ( Just (fingerprintToBS fingerPrint) , ([], Just res))
-            Left diags -> return (Nothing, (diags, Nothing))
+            Left diags -> do
+              traceM "==== got no result"
+              return (Nothing, (diags, Nothing))
 
     defineEarlyCutoff (cmapWithPrio LogShake recorder) $ RuleNoDiagnostics $ \GetModSummaryWithoutTimestamps f -> do
         mbMs <- use GetModSummary f

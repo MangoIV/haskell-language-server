@@ -1,5 +1,38 @@
 {
   "nodes": {
+    "algebraic-graphs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1752401271,
+        "narHash": "sha256-sQRAjHV+bor/SBt/zDtcw3tN1ir7xjjevEdyYqilNWg=",
+        "owner": "snowleopard",
+        "repo": "alga",
+        "rev": "d4e43fb42db05413459fb2df493361d5a666588a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "snowleopard",
+        "repo": "alga",
+        "type": "github"
+      }
+    },
+    "direct-sqlite": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771926922,
+        "narHash": "sha256-ofzJ+74ZTcPKJSQtNoP44wGfjbjGanD4hS6nIURfo+8=",
+        "owner": "mangoiv",
+        "repo": "direct-sqlite",
+        "rev": "f5466348ea0ea05be13f7f75444ac1da8d4f675a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mangoiv",
+        "ref": "mangoiv/wasi",
+        "repo": "direct-sqlite",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -12,6 +45,21 @@
       },
       "original": {
         "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_2": {
+      "locked": {
+        "lastModified": 1746162366,
+        "narHash": "sha256-5SSSZ/oQkwfcAz/o/6TlejlVGqeK08wyREBQ5qFFPhM=",
+        "owner": "nix-community",
+        "repo": "flake-compat",
+        "rev": "0f158086a2ecdbb138cd0429410e44994f1b7e4b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
         "repo": "flake-compat",
         "type": "github"
       }
@@ -34,30 +82,218 @@
         "type": "github"
       }
     },
+    "flake-utils_2": {
+      "inputs": {
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "ghc-exactprint": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1760472211,
+        "narHash": "sha256-xKmfr+gzHtH4A++8S3w9LtMSJltilkwADMaruK/6zyk=",
+        "owner": "alanz",
+        "repo": "ghc-exactprint",
+        "rev": "e2224c5e3d335e5a2c50a44749367337e278a8c0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "alanz",
+        "repo": "ghc-exactprint",
+        "type": "github"
+      }
+    },
+    "ghc-wasm": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "host": "gitlab.haskell.org",
+        "lastModified": 1771926056,
+        "narHash": "sha256-4jS+uW7SRhwJd91CTEGr3wg6cwU+/IM9aTQw++glKXw=",
+        "owner": "haskell-wasm",
+        "repo": "ghc-wasm-meta",
+        "rev": "876d63b662179b595dcc6e13a1cee8f0cf4d5651",
+        "type": "gitlab"
+      },
+      "original": {
+        "host": "gitlab.haskell.org",
+        "owner": "haskell-wasm",
+        "ref": "debug",
+        "repo": "ghc-wasm-meta",
+        "type": "gitlab"
+      }
+    },
+    "hiedb": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767011978,
+        "narHash": "sha256-2rtQPuq1isTKwr8XLCUWA4xRdf9GTNVJEAzfA++e73w=",
+        "owner": "mangoiv",
+        "repo": "hiedb",
+        "rev": "ae5131658040852311744e8da7c559aabeb32742",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mangoiv",
+        "ref": "mangoiv/no-terminal-size",
+        "repo": "hiedb",
+        "type": "github"
+      }
+    },
+    "integer-logarithms": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767005418,
+        "narHash": "sha256-dvJyB6kyZUo1VsQ+MC4X0MRLbegdAV+Vqf9o+VNbQJs=",
+        "owner": "mangoiv",
+        "repo": "integer-logarithms",
+        "rev": "a20958190ff09ec575053d0a1538c3a5dd0841fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mangoiv",
+        "ref": "mangoiv/914",
+        "repo": "integer-logarithms",
+        "type": "github"
+      }
+    },
+    "network-wasm": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1736884463,
+        "narHash": "sha256-ZGBPQCxMWcONTuvS2p2z76guy2hYF7fXPS8ZxNDgeug=",
+        "owner": "haskell-wasm",
+        "repo": "network",
+        "rev": "1dc870889eee4ac733335ced4e274b4dfe8ed369",
+        "type": "github"
+      },
+      "original": {
+        "owner": "haskell-wasm",
+        "ref": "wasi",
+        "repo": "network",
+        "type": "github"
+      }
+    },
+    "nix-wasm": {
+      "inputs": {
+        "flake-compat": "flake-compat_2",
+        "ghc-wasm-meta": [
+          "ghc-wasm"
+        ],
+        "nixpkgs": [
+          "nixpkgs-wasm"
+        ]
+      },
+      "locked": {
+        "lastModified": 1767307723,
+        "narHash": "sha256-NKQkGPB/VsvzT3V7rcmsi+5UKyV2MTZR5M486A+oCwE=",
+        "owner": "mangoiv",
+        "repo": "nix-wasm",
+        "rev": "a1a2890a7e9a295bece1e32f4b7dc6ae930c0339",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mangoiv",
+        "ref": "mangoiv/914",
+        "repo": "nix-wasm",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1748437873,
-        "narHash": "sha256-E2640ouB7VxooUQdCiDRo/rVXnr1ykgF9A7HrwWZVSo=",
+        "lastModified": 1767047869,
+        "narHash": "sha256-tzYsEzXEVa7op1LTnrLSiPGrcCY6948iD0EcNLWcmzo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c742ae7908a82c9bf23ce27bfca92a00e9bcd541",
+        "rev": "89dbf01df72eb5ebe3b24a86334b12c27d68016a",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
+        "ref": "nixos-25.11",
         "repo": "nixpkgs",
-        "rev": "c742ae7908a82c9bf23ce27bfca92a00e9bcd541",
+        "type": "github"
+      }
+    },
+    "nixpkgs-wasm": {
+      "locked": {
+        "lastModified": 1766996594,
+        "narHash": "sha256-SosfgQSqVmOkqVgNYJnxW5FvoIQX4grOcpIKNrIwz4o=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "0744ef1b047f07d31d9962d757ffe38ec14a4d41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1766996594,
+        "narHash": "sha256-SosfgQSqVmOkqVgNYJnxW5FvoIQX4grOcpIKNrIwz4o=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0744ef1b047f07d31d9962d757ffe38ec14a4d41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
+        "algebraic-graphs": "algebraic-graphs",
+        "direct-sqlite": "direct-sqlite",
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "ghc-exactprint": "ghc-exactprint",
+        "ghc-wasm": "ghc-wasm",
+        "hiedb": "hiedb",
+        "integer-logarithms": "integer-logarithms",
+        "network-wasm": "network-wasm",
+        "nix-wasm": "nix-wasm",
+        "nixpkgs": "nixpkgs_2",
+        "nixpkgs-wasm": "nixpkgs-wasm"
       }
     },
     "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
